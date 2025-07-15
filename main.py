@@ -1,6 +1,8 @@
 import psycopg2
 import psycopg2.extras
 import argparse
+import pandas as pd
+from sqlalchemy import create_engine
 import csv
 import datetime
 
@@ -103,6 +105,35 @@ def main(prefecture_name):
         if conn is not None:
             conn.close()
             print("データベース接続を閉じました。")
+
+    # pandasを使用
+    print("pandasを使ってデータを取得し、CSVに保存します...")
+
+    try:
+        # データベースへの接続エンジンを作成
+        # f-stringで接続文字列を作成
+        engine_str = (
+            f"postgresql+psycopg2://{DB_CONFIG['user']}:{DB_CONFIG['password']}"
+            f"@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
+        )
+        engine = create_engine(engine_str)
+
+        params = (prefecture_name,)
+
+        # SQLを実行し、結果を直接PandasのDataFrameに読み込む
+        df = pd.read_sql_query(SQL_QUERY, engine, params=params)
+
+        print("--- 取得したデータ（先頭5件） ---")
+        print(df.head())
+
+        # DataFrameをCSVファイルに出力
+        output_filename = f"{formatted_string}_areas_pandas.csv"
+        df.to_csv(output_filename, index=False, encoding="utf-8-sig")
+
+        print(f"\nデータを'{output_filename}'に保存しました。")
+
+    except Exception as e:
+        print(f"エラーが発生しました: {e}")
 
 
 if __name__ == "__main__":
