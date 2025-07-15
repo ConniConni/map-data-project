@@ -1,6 +1,7 @@
 import psycopg2
 import psycopg2.extras
 import argparse
+import csv
 
 """
 流れ
@@ -69,6 +70,23 @@ def main(prefecture_name):
                 )
                 # この後の処理は行わないように、ここで関数を終了させる
                 return
+
+            output_filename = f"{prefecture_name}_areas.csv"
+            try:
+                with open(output_filename, "w", encoding="utf-8-sig", newline="") as f:
+                    # ヘッダーをDictCursorのキーから動的に取得
+                    header = results[0].keys()
+                    writer = csv.writer(f)
+                    writer.writerow(header)  # ヘッダーを書き込む
+
+                    # 各行のデータを書き込む
+                    for row in results:
+                        writer.writerow(row)  # DictRowはそのままwriterowに渡せる
+
+                print(f"データを'{output_filename}'に保存しました。")
+
+            except IOError as e:
+                print(f"ファイル書き込みエラー: {e}")
 
             print("--- 取得結果 ---")
             for row in results:
