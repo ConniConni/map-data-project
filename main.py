@@ -31,11 +31,13 @@ SELECT
 FROM
     V_JAPAN_ADMIN
 WHERE
-    prefecture = '東京都';
+    prefecture = %s;
 """
 
 
 def fetch_data_with_psycopg2():
+    print("表示する都道府県を入力してください")
+    input_prefecture = (input(">>> "),)
     print("psycopg2を使ってデータを取得します...")
     """
     1. データベース接続
@@ -54,7 +56,7 @@ def fetch_data_with_psycopg2():
         # cursor_factoryを使うと、結果を辞書形式で受け取れる
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             # SQLを実行
-            cur.execute(SQL_QUERY)
+            cur.execute(SQL_QUERY, input_prefecture)
 
             # 実行結果をすべて取得
             results = cur.fetchall()
