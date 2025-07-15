@@ -2,6 +2,7 @@ import psycopg2
 import psycopg2.extras
 import argparse
 import csv
+import datetime
 
 """
 流れ
@@ -71,7 +72,10 @@ def main(prefecture_name):
                 # この後の処理は行わないように、ここで関数を終了させる
                 return
 
-            output_filename = f"{prefecture_name}_areas.csv"
+            now = datetime.datetime.now()
+            formatted_string = now.strftime("%Y%m%d_%H%M%S")
+
+            output_filename = f"{formatted_string}_areas.csv"
             try:
                 with open(output_filename, "w", encoding="utf-8-sig", newline="") as f:
                     # ヘッダーをDictCursorのキーから動的に取得
