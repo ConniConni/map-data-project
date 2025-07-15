@@ -7,13 +7,22 @@ import csv
 import datetime
 
 """
-流れ
+流れ ~psycopg2~
 1. DB接続情報を定義
 2. クエリを作成
 3. psycpg2でDB接続
 4. with構文を使い、DBと対話可能な状態にする
-5. エラーハンドリング
-6. DB切断
+5. CSV書き込み
+6. エラーハンドリング
+7. DB切断
+
+流れ ~psycopg2 & pandas~
+1. DB接続情報を定義
+2. クエリを作成
+3. sqlalchemyでデータベースへの接続エンジンを作成
+4. SQLを実行し、結果を直接PandasのDataFrameに読み込む
+5. CSV書き込み
+6. エラーハンドリング
 """
 
 
@@ -116,6 +125,7 @@ def main(prefecture_name):
             f"postgresql+psycopg2://{DB_CONFIG['user']}:{DB_CONFIG['password']}"
             f"@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
         )
+        print(engine_str)
         engine = create_engine(engine_str)
 
         params = (prefecture_name,)
