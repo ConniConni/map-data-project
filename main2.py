@@ -3,7 +3,7 @@ import psycopg2.extras
 from itertools import islice
 import csv
 import argparse
-
+import datetime
 
 # DB接続情報を定義
 DB_CONFIG = {
@@ -56,9 +56,13 @@ def main(prefecture_name):
                 for row in islice(rows, 1):
                     print(f"市区町村名: {row['city_name']},面積: {row['area']}")
 
+                # csvファイルは現在時刻で yyyymmdd_hhmmss_areas.csv とする
+                now_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                file_name = now_str + "_areas.csv"
+
                 # 結果をcsvに書き込み（30件のみ）
                 try:
-                    with open("tokyo_areas.csv", "w", encoding="utf-8") as f:
+                    with open(file_name, "w", encoding="utf-8") as f:
                         header = rows[0].keys()
                         writer = csv.writer(f)
                         writer.writerow(header)
@@ -67,7 +71,7 @@ def main(prefecture_name):
                         for row in islice(rows, 29):
                             writer.writerow(row)
 
-                        print("#### csvファイルに保存しました。 ####")
+                        print(f"#### {file_name}に保存しました。 ####")
 
                 except IOError as e:
                     print(f"ファイル書き込みエラー：{e}")
@@ -86,7 +90,7 @@ def main(prefecture_name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="都道府県を指定して、該当の市区長村名と面積をCSV形式で取得する。"
+        description="都道府県を指定して、該当の市区長村名と面積をCSV形式で取得する。(指定なしの場合は東京都が指定される)"
     )
     parser.add_argument(
         "-p",
