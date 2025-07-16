@@ -2,6 +2,7 @@ import psycopg2
 import psycopg2.extras
 from itertools import islice
 import csv
+import argparse
 
 
 # DB接続情報を定義
@@ -24,11 +25,11 @@ SELECT
 FROM
     V_JAPAN_ADMIN
 WHERE
-    prefecture = '岩手県';
+    prefecture = %s;
 """
 
 
-def main():
+def main(prefecture_name):
     conn = None  # connを初期化
     try:
         # DB接続を行う
@@ -40,36 +41,36 @@ def main():
             print("#### カーソルを作成しました。 ####")
 
             # SQLを実行
-            cur.execute(SQL_QUERY)
+            cur.execute(SQL_QUERY, (prefecture_name,))
 
             # 実行結果をまとめて取得する
             rows = cur.fetchall()
 
             # 実行結果がない場合、コンソールへの表示をスキップしてDB接続を閉じる
             if not rows:
-                print("データが見つかりませんでした。")
-                return
+                print(f"{prefecture_name}に該当するデータが見つかりませんでした。")
 
-            # コンソールに実行結果を表示（結果は１件のみ表示）
-            print("=== 実行結果表示 ===")
-            for row in islice(rows, 1):
-                print(f"市区町村名: {row['city_name']},面積: {row['area']}")
+            else:
+                # コンソールに実行結果を表示（結果は１件のみ表示）
+                print("=== 実行結果表示（１件のみ） ===")
+                for row in islice(rows, 1):
+                    print(f"市区町村名: {row['city_name']},面積: {row['area']}")
 
-            # 結果をcsvに書き込み（30件のみ）
-            try:
-                with open("iwate_areas.csv", "w", encoding="utf-8") as f:
-                    header = rows[0].keys()
-                    writer = csv.writer(f)
-                    writer.writerow(header)
+                # 結果をcsvに書き込み（30件のみ）
+                try:
+                    with open("tokyo_areas.csv", "w", encoding="utf-8") as f:
+                        header = rows[0].keys()
+                        writer = csv.writer(f)
+                        writer.writerow(header)
 
-                    # 各行のデータを書き込む
-                    for row in islice(rows, 29):
-                        writer.writerow(row)
+                        # 各行のデータを書き込む
+                        for row in islice(rows, 29):
+                            writer.writerow(row)
 
-                    print("#### csvファイルに保存しました。 ####")
+                        print("#### csvファイルに保存しました。 ####")
 
-            except IOError as e:
-                print(f"ファイル書き込みエラー：{e}")
+                except IOError as e:
+                    print(f"ファイル書き込みエラー：{e}")
 
         print("#### カーソルを閉じました。 ####")
 
@@ -84,4 +85,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="都道府県を指定して、該当の市区長村名と面積をCSV形式で取得する。"
+    )
+    parser.add_argument(
+        "-p",
+        "--prefecture",
+        type=str,
+        default="東京都",
+        help="都道府県名を入力してください。",
+        metavar="PREFECTURE_NAME",  # ヘルプメッセージでの表示名を指定
+    )
+    args = parser.parse_args()
+    main(args.prefecture)
