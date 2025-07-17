@@ -29,6 +29,28 @@ WHERE
 """
 
 
+def setup_parser():
+    """argparseのパーサをセットアップし定義を返す関数
+
+    Returns:
+        argparse.ArgumentParser: 設定済みのパーサーオブジェクト
+
+    """
+    parser = argparse.ArgumentParser(
+        description="都道府県を指定して、該当の市区長村名と面積をCSV形式で取得する。(指定なしの場合は東京都が指定される)"
+    )
+    parser.add_argument(
+        "-p",
+        "--prefecture",
+        type=str,
+        default="東京都",
+        help="都道府県名を入力してください。",
+        metavar="PREFECTURE_NAME",  # ヘルプメッセージでの表示名を指定
+    )
+
+    return parser
+
+
 def main(prefecture_name):
     conn = None  # connを初期化
     try:
@@ -89,16 +111,9 @@ def main(prefecture_name):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="都道府県を指定して、該当の市区長村名と面積をCSV形式で取得する。(指定なしの場合は東京都が指定される)"
-    )
-    parser.add_argument(
-        "-p",
-        "--prefecture",
-        type=str,
-        default="東京都",
-        help="都道府県名を入力してください。",
-        metavar="PREFECTURE_NAME",  # ヘルプメッセージでの表示名を指定
-    )
+    # パーサオブジェクトを生成
+    parser = setup_parser()
+    # 取得したパーサオブジェクトを使って引数を解析
     args = parser.parse_args()
+    # 解析結果をmainに渡す
     main(args.prefecture)
